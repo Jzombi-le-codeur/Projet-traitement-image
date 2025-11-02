@@ -1,11 +1,8 @@
-import json
 import pathlib
 import os
-import re
 from tkinter import *
 from PIL import Image, ImageTk
 import numpy as np
-import copy
 
 
 class UnsupportedFileError(Exception):
@@ -13,9 +10,9 @@ class UnsupportedFileError(Exception):
         super.__init__(message)
 
 
-class Support(Tk):
-    def __init__(self):
-        super().__init__()
+class Support():
+    def __init__(self, win: Toplevel | None = None):
+        self.win = win
         self.img_type = str()
         self.img_content = str()
         self.img_file_lines = list()
@@ -43,7 +40,7 @@ class Support(Tk):
         self.formated_img_content["meta"]["extension"] = str(pathlib.Path(os.path.basename(filename)).suffix)
         self.formated_img_content["meta"]["col"] = int(self.img_file_lines[1])
         self.formated_img_content["meta"]["lig"] = int(self.img_file_lines[2])
-        self.formated_img_content["meta"]["mod"] = str
+        self.formated_img_content["meta"]["mod"] = str()
 
         # Données
         # Supprimer les métadonnées des données
@@ -62,11 +59,12 @@ class Support(Tk):
         if self.img_type != "ppm":
             formated_datas = []
             for line in self.img_file_lines:
-                formated_line = re.split(' +', line)
+                # formated_line = re.split(' +', line)
+                formated_line = [int(val) for val in line.split() if val]
                 formated_datas.append(formated_line)
 
             # PEUT ETRE REVOIR REFORMATAGE SI 1 LIGNE FICHIER PAS EGAL A LIGNE IMAGE
-            self.formated_img_content["pix"] = formated_datas
+            # self.formated_img_content["pix"] = formated_datas
 
         else:
             formated_datas = []
@@ -99,7 +97,13 @@ class Support(Tk):
                 # Ajouter la ligne aux données de l'image
                 formated_datas.append(line_pixels)
 
-            self.formated_img_content["pix"] = formated_datas
+            # self.formated_img_content["pix"] = formated_datas
+
+        # Vérifier qu'aucune ligne n'est vide
+        formated_datas_arr = np.array(formated_datas, dtype=object)
+        formated_datas_arr = formated_datas_arr[np.array([len(row) > 0 for row in formated_datas_arr])]
+        self.formated_img_content["pix"] = formated_datas_arr.tolist()
+
 
     def open(self, filename: str | pathlib.Path) -> dict:
         # Ouvrir le fichier
@@ -115,12 +119,27 @@ class Support(Tk):
 
         return self.formated_img_content
 
-    def __create_image(self, image: dict, ratio: int = 1) -> None:
+    def __calculate_ratio(self, image: dict) -> int:
+        max_lines_px = 720
+        max_height_px = 1280
+
+        img_lines_px = image["meta"]["lig"]
+        img_height_px = image["meta"]["col"]
+
+        ratio = 0
+        while True:
+            ratio += 1
+            if img_lines_px*ratio > max_lines_px or img_height_px*ratio > max_height_px:
+                break
+
+        return ratio
+
+    def create_image(self, image: dict, ratio: int = 1) -> None:
+        ratio = self.__calculate_ratio(image=image)/ratio
         if self.img_type == "pbm":
             image_pxs = np.array(image["pix"], dtype=np.uint8)
             image_pxs[image_pxs == 1] = 255
             image_pxs = np.repeat(image_pxs[..., np.newaxis], repeats=3, axis=2)
-
             image_pixels = np.repeat(np.repeat(image_pxs, repeats=ratio, axis=1), repeats=ratio, axis=0)
             self.img_to_display = Image.fromarray(image_pixels, mode="RGB")
 
@@ -136,41 +155,38 @@ class Support(Tk):
             image_pixels = np.repeat(np.repeat(image_pxs, repeats=ratio, axis=1), repeats=ratio, axis=0)
             self.img_to_display = Image.fromarray(image_pixels, mode="RGB")
 
-    def __display_image(self) -> None:
-        self.title("image")
+        return self.img_to_display
 
-        image_label = Label(self, image=self.img_to_display)
+    def display_image(self, image: Image) -> None:
+        self.win.title("image")
+
+        image = ImageTk.PhotoImage(image)
+        image_label = Label(self.win, image=image)
+        image_label.image = image
         image_label.pack()
 
-        self.mainloop()
-
-    def show(self, img: dict) -> None:
-        self.__create_image(image=img, ratio=20)
-        self.__display_image()
-
     def compare(self, imgs: list):
-        images = list()
-        for img in imgs:
-            self.__create_image(image=img, ratio=20)
-            images.append(ImageTk.PhotoImage(self.img_to_display))
+        image_to_display = ImageTk.PhotoImage(imgs[0])
+        image2_to_display = ImageTk.PhotoImage(imgs[1])
 
-        self.images_to_display = images
-
-        self.title("test")
-        image1 = Label(self, image=images[0])
+        self.win.title("test")
+        image1 = Label(self.win, image=image_to_display)
+        image1.image = image_to_display
         image1.grid(column=1, row=1, padx=10)
-        image2 = Label(self, image=images[1])
+        image2 = Label(self.win, image=image2_to_display)
+        image2.image = image2_to_display
         image2.grid(column=2, row=1, padx=10)
-
-        self.mainloop()
 
 
 if __name__ == "__main__":
-    support = Support()
+    win = Tk()
+    support = Support(win=win)
     imgs_paths = [pathlib.Path("images\\salva.pbm"), pathlib.Path("images\\salva.ppm")]
     images = list()
     for i in imgs_paths:
-        img = support.open(filename=i)
+        support_i = Support(win=win)
+        img = support_i.open(filename=i)
+        img = support_i.create_image(image=img)
         images.append(img)
 
     support.compare(imgs=images)
