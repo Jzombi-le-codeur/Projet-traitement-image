@@ -38,6 +38,10 @@ class Traitement:
         img_pxs = np.rot90(img_pxs, k=-1)
         img["pix"] = img_pxs
         img["meta"]["mod"] = "\n- Rotation 90°"
+        col = img["meta"]["col"]
+        lig = img["meta"]["lig"]
+        img["meta"]["col"] = lig
+        img["meta"]["lig"] = col
         return img
 
     def convert_to_grey_mode(self, img: dict, file_conversion, local=False) -> dict:

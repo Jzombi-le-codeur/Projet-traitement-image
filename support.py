@@ -177,6 +177,28 @@ class Support():
         image2.image = image2_to_display
         image2.grid(column=2, row=1, padx=10)
 
+    def save(self, img: dict, path: str | pathlib.Path = pathlib.Path("images")):
+        print(img)
+        if img["meta"]["extension"] == ".pbm":
+            print("pbm")
+            with open(pathlib.Path.joinpath(path, f"{img["meta"]["title"]}_modifié.pbm"), "w") as file:
+                file.writelines(["P1\n", str(img["meta"]["col"])+"\n", str(img["meta"]["lig"])+"\n"])
+                np.savetxt(file, np.array(img["pix"], dtype=np.uint8), fmt="%d", delimiter=" ")
+
+        elif img["meta"]["extension"] == ".pgm":
+            print("pgm")
+            with open(pathlib.Path.joinpath(path, f"{img["meta"]["title"]}_modifié.pgm"), "w") as file:
+                file.writelines(["P2\n", str(img["meta"]["col"])+"\n", str(img["meta"]["lig"])+"\n", "255"+"\n"])
+                np.savetxt(file, np.array(img["pix"], dtype=np.uint8), fmt="%d", delimiter=" ")
+
+        else:
+            print("ppm")
+            with open(pathlib.Path.joinpath(path, f"{img["meta"]["title"]}_modifié.ppm"), "w") as file:
+                file.writelines(["P3\n", str(img["meta"]["col"])+"\n", str(img["meta"]["lig"])+"\n", "255"+"\n"])
+                img_pxs = np.array(img["pix"], dtype=np.uint8)
+                img_pxs = img_pxs.reshape(img_pxs.shape[0], -1)
+                np.savetxt(file, img_pxs, fmt="%d", delimiter=" ")
+
 
 if __name__ == "__main__":
     win = Tk()

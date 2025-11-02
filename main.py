@@ -152,6 +152,8 @@ class Win(Tk):
             img = support.open(filename=self.img_1_path_entry.get())
             image = self.traitement.symVert(img=img)
 
+            support.save(img=image)
+
             image = support.create_image(image=image, ratio=2)
             img = support.create_image(image=img, ratio=2)
 
@@ -169,6 +171,8 @@ class Win(Tk):
             support = Support(win=win)
             img = support.open(filename=self.img_1_path_entry.get())
             image = self.traitement.symHori(img=img)
+
+            support.save(img=image)
 
             image = support.create_image(image=image, ratio=2)
             img = support.create_image(image=img, ratio=2)
@@ -189,6 +193,8 @@ class Win(Tk):
             img = support.open(filename=self.img_1_path_entry.get())
             image = self.traitement.rot180(img=img)
 
+            support.save(img=image)
+
             image = support.create_image(image=image, ratio=2)
             img = support.create_image(image=img, ratio=2)
 
@@ -207,12 +213,15 @@ class Win(Tk):
             img = support.open(filename=self.img_1_path_entry.get())
             image = self.traitement.rot90(img=img)
 
+            support.save(img=image)
+
             image = support.create_image(image=image, ratio=2)
             img = support.create_image(image=img, ratio=2)
 
             support.compare(imgs=[img, image])
 
-        except FileNotFoundError:
+        except FileNotFoundError as error:
+            print(error)
             messagebox.showerror(title="Fichier inexistant !",
                                  message=f"Le fichier {self.img_1_path_entry.get()}\nn'existe pas !")
             self.close_win(img_id=7)
@@ -225,6 +234,9 @@ class Win(Tk):
             img = support.open(filename=self.img_1_path_entry.get())
             image = self.traitement.convert_to_grey_mode(img=img, file_conversion=self.file_conversion)
             support.img_type = "pgm" if self.file_conversion else support.img_type
+
+            support.save(img=image)
+
             image = support.create_image(image=image, ratio=2)
             support.img_type = img["meta"]["extension"]
             support.img_type = support.img_type[1:len(support.img_type)] if support.img_type[0] == "." else support.img_type
@@ -245,6 +257,9 @@ class Win(Tk):
             img = support.open(filename=self.img_1_path_entry.get())
             image = self.traitement.convert_to_bw_mode(img=img, file_conversion=self.file_conversion)
             support.img_type = "pbm"
+
+            support.save(img=image)
+
             image = support.create_image(image=image, ratio=2)
 
             support.img_type = img["meta"]["extension"]
@@ -267,6 +282,8 @@ class Win(Tk):
             img = support.open(filename=self.img_1_path_entry.get())
             image = self.traitement.change_brightness(img=img, t=t)
 
+            support.save(img=image)
+
             image = support.create_image(image=image, ratio=2)
             img = support.create_image(image=img, ratio=2)
 
@@ -288,6 +305,8 @@ class Win(Tk):
             support = Support(win=win)
             img = support.open(filename=self.img_1_path_entry.get())
             image = self.traitement.change_brightness(img=img, t=t)
+
+            support.save(img=image)
 
             image = support.create_image(image=image, ratio=2)
             img = support.create_image(image=img, ratio=2)
