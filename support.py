@@ -178,7 +178,6 @@ class Support():
         image2.grid(column=2, row=1, padx=10)
 
     def save(self, img: dict, path: str | pathlib.Path = pathlib.Path("images")):
-        print(img["meta"]["extension"])
         if img["meta"]["extension"] == ".pbm":
             with open(pathlib.Path.joinpath(path, f"{img["meta"]["title"]}_modifié.pbm"), "w") as file:
                 file.writelines(["P1\n", str(img["meta"]["col"])+"\n", str(img["meta"]["lig"])+"\n"])

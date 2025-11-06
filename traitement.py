@@ -152,26 +152,44 @@ class Traitement:
 
     def decrease_size(self, img: dict, ratio: int) -> dict:
         img = deepcopy(img)
-        print(img["meta"])
         img_pxs = np.array(img["pix"], dtype=np.uint8)
-        if len(img_pxs)%2 == 1:
-            img_pxs_first = img_pxs[:, :-1, :]
 
-        else:
-            img_pxs_first = img_pxs
-
-        img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // 2, 2, 3))
+        """ Stretch la largeur """
+        i = img_pxs.shape[1] % ratio
+        cols = img_pxs.shape[1] - i
+        img_pxs_first = img_pxs[:, :cols, :]
+        img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
         img_pxs_first = np.mean(img_pxs_first, axis=-2)
         img_pxs_first = img_pxs_first.astype(int)
-        last_col = img_pxs[:, -1, :]
-        if len(img_pxs) % 2 == 1:
-            img_pxs = np.concatenate([img_pxs_first, last_col[:, np.newaxis, :]], axis=1)
+        last_col = img_pxs[:, cols:, :]
+        """
+        if i > 0:
+            img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
 
         else:
-            img_pxs = img_pxs_first
+        """
+        img_pxs = img_pxs_first
+
+        """ Hauteur """
+        img_pxs = np.rot90(img_pxs, k=-1)
+        i = img_pxs.shape[1] % ratio
+        cols = img_pxs.shape[1] - i
+        img_pxs_first = img_pxs[:, :cols, :]
+        img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
+        img_pxs_first = np.mean(img_pxs_first, axis=-2)
+        img_pxs_first = img_pxs_first.astype(int)
+        last_col = img_pxs[:, cols:, :]
+        """
+        if i > 0:
+            img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
+
+        else:
+        """
+        img_pxs = img_pxs_first
+
+        img_pxs = np.rot90(img_pxs, k=1)
 
         img["pix"] = img_pxs
-        print(img_pxs.shape)
         img["meta"]["col"] = img_pxs.shape[1]
         img["meta"]["lig"] = img_pxs.shape[0]
         img["meta"]["mod"] = "\n- Taille réduite"
