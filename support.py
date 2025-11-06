@@ -129,12 +129,12 @@ class Support():
         ratio = 0
         while True:
             ratio += 1
-            if img_lines_px*ratio > max_lines_px or img_height_px*ratio > max_height_px:
+            if int(img_lines_px)*ratio > max_lines_px or int(img_height_px)*ratio > max_height_px:
                 break
 
         return ratio
 
-    def create_image(self, image: dict, ratio: int = 1) -> None:
+    def create_image(self, image: dict, ratio: int = 2) -> None:
         ratio = self.__calculate_ratio(image=image)/ratio
         if self.img_type == "pbm":
             image_pxs = np.array(image["pix"], dtype=np.uint8)
@@ -178,21 +178,18 @@ class Support():
         image2.grid(column=2, row=1, padx=10)
 
     def save(self, img: dict, path: str | pathlib.Path = pathlib.Path("images")):
-        print(img)
+        print(img["meta"]["extension"])
         if img["meta"]["extension"] == ".pbm":
-            print("pbm")
             with open(pathlib.Path.joinpath(path, f"{img["meta"]["title"]}_modifié.pbm"), "w") as file:
                 file.writelines(["P1\n", str(img["meta"]["col"])+"\n", str(img["meta"]["lig"])+"\n"])
                 np.savetxt(file, np.array(img["pix"], dtype=np.uint8), fmt="%d", delimiter=" ")
 
         elif img["meta"]["extension"] == ".pgm":
-            print("pgm")
             with open(pathlib.Path.joinpath(path, f"{img["meta"]["title"]}_modifié.pgm"), "w") as file:
                 file.writelines(["P2\n", str(img["meta"]["col"])+"\n", str(img["meta"]["lig"])+"\n", "255"+"\n"])
                 np.savetxt(file, np.array(img["pix"], dtype=np.uint8), fmt="%d", delimiter=" ")
 
         else:
-            print("ppm")
             with open(pathlib.Path.joinpath(path, f"{img["meta"]["title"]}_modifié.ppm"), "w") as file:
                 file.writelines(["P3\n", str(img["meta"]["col"])+"\n", str(img["meta"]["lig"])+"\n", "255"+"\n"])
                 img_pxs = np.array(img["pix"], dtype=np.uint8)

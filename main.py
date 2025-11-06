@@ -8,8 +8,8 @@ from tkinter import messagebox
 class Win(Tk):
     def __init__(self):
         super().__init__()
-        self.wins = [None]*11
-        self.wins_opened = [False]*11
+        self.wins = [None]*14
+        self.wins_opened = [False]*14
         self.resolution = (1024, 576)
         self.imgs = []
 
@@ -144,6 +144,20 @@ class Win(Tk):
         self.decrease_brightness_entry = Entry(self.brightness_frame, width=5)
         self.decrease_brightness_entry.grid(row=1, column=1)
 
+        self.size_frame = Frame(self)
+        self.size_frame.pack()
+        self.increase_size_button = Button(self.size_frame, text="Augmenter la taille de l'image (ratio entier)",
+                                                 command=lambda: self.increase_size())
+        self.increase_size_button.grid(row=0, column=0)
+        self.increase_size_entry = Entry(self.size_frame, width=5)
+        self.increase_size_entry.grid(row=0, column=1)
+
+        self.decrease_size_button = Button(self.size_frame, text="Diminuer la luminosité - (0-100) %",
+                                                command=lambda: self.decrease_size())
+        self.decrease_size_button.grid(row=1, column=0)
+        self.decrease_size_entry = Entry(self.size_frame, width=5)
+        self.decrease_size_entry.grid(row=1, column=1)
+
     def symVert(self):
         try:
             self.wins[3] = Toplevel()
@@ -221,7 +235,6 @@ class Win(Tk):
             support.compare(imgs=[img, image])
 
         except FileNotFoundError as error:
-            print(error)
             messagebox.showerror(title="Fichier inexistant !",
                                  message=f"Le fichier {self.img_1_path_entry.get()}\nn'existe pas !")
             self.close_win(img_id=7)
@@ -320,6 +333,54 @@ class Win(Tk):
             messagebox.showerror(title="Fichier inexistant !",
                                  message=f"Le fichier {self.img_1_path_entry.get()}\nn'existe pas !")
             self.close_win(img_id=11)
+            
+    def increase_size(self):
+        try:
+            ratio = max(0, min(255, int(self.increase_size_entry.get())))
+            self.wins[12] = Toplevel()
+            win = self.wins[12]
+            support = Support(win=win)
+            img = support.open(filename=self.img_1_path_entry.get())
+            image = self.traitement.increase_size(img=img, ratio=ratio)
+
+            support.save(img=image)
+
+            image = support.create_image(image=image, ratio=2)
+            img = support.create_image(image=img, ratio=2)
+
+            support.compare(imgs=[img, image])
+
+        except ValueError:
+            messagebox.showerror(title="Erreur de saisie !", message="Veuillez indiquer le nombre en % (0-100) !")
+
+        except FileNotFoundError:
+            messagebox.showerror(title="Fichier inexistant !",
+                                 message=f"Le fichier {self.img_1_path_entry.get()}\nn'existe pas !")
+            self.close_win(img_id=12)
+
+    def decrease_size(self):
+        try:
+            ratio = max(0, min(255, int(self.decrease_size_entry.get())))
+            self.wins[13] = Toplevel()
+            win = self.wins[13]
+            support = Support(win=win)
+            img = support.open(filename=self.img_1_path_entry.get())
+            image = self.traitement.decrease_size(img=img, ratio=ratio)
+
+            support.save(img=image)
+
+            image = support.create_image(image=image, ratio=2)
+            img = support.create_image(image=img, ratio=2)
+
+            support.compare(imgs=[img, image])
+
+        except ValueError:
+            messagebox.showerror(title="Erreur de saisie !", message="Veuillez indiquer le nombre en % (0-100) !")
+
+        except FileNotFoundError:
+            messagebox.showerror(title="Fichier inexistant !",
+                                 message=f"Le fichier {self.img_1_path_entry.get()}\nn'existe pas !")
+            self.close_win(img_id=13)
 
     def manage_win(self):
         # Informations fenêtres

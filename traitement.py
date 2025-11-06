@@ -127,3 +127,52 @@ class Traitement:
             img["meta"]["mod"] = "\n- Luminosité augmentée"
 
         return img
+
+    def increase_size(self, img: dict, ratio: int) -> dict:
+        img = deepcopy(img)
+        if img["meta"]["extension"] == ".pbm":
+            image_pxs = np.array(img["pix"], dtype=np.uint8)
+            image_pixels = np.repeat(np.repeat(image_pxs, repeats=ratio, axis=1), repeats=ratio, axis=0)
+
+        elif img["meta"]["extension"] == ".pgm":
+            image_pxs = np.array(img["pix"], dtype=np.uint8)
+            image_pixels = np.repeat(np.repeat(image_pxs, repeats=ratio, axis=1), repeats=ratio, axis=0)
+
+        elif img["meta"]["extension"] == ".ppm":
+            image_pxs = np.array(img["pix"], dtype=np.uint8)
+            image_pixels = np.repeat(np.repeat(image_pxs, repeats=ratio, axis=1), repeats=ratio, axis=0)
+
+        img["pix"] = image_pixels
+
+        img["meta"]["lig"] = str(int(img["meta"]["lig"])*int(ratio))
+        img["meta"]["col"] = str(int(img["meta"]["col"])*int(ratio))
+        img["meta"]["mod"] = "Image aggrandie"
+
+        return img
+
+    def decrease_size(self, img: dict, ratio: int) -> dict:
+        img = deepcopy(img)
+        print(img["meta"])
+        img_pxs = np.array(img["pix"], dtype=np.uint8)
+        if len(img_pxs)%2 == 1:
+            img_pxs_first = img_pxs[:, :-1, :]
+
+        else:
+            img_pxs_first = img_pxs
+
+        img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // 2, 2, 3))
+        img_pxs_first = np.mean(img_pxs_first, axis=-2)
+        img_pxs_first = img_pxs_first.astype(int)
+        last_col = img_pxs[:, -1, :]
+        if len(img_pxs) % 2 == 1:
+            img_pxs = np.concatenate([img_pxs_first, last_col[:, np.newaxis, :]], axis=1)
+
+        else:
+            img_pxs = img_pxs_first
+
+        img["pix"] = img_pxs
+        print(img_pxs.shape)
+        img["meta"]["col"] = img_pxs.shape[1]
+        img["meta"]["lig"] = img_pxs.shape[0]
+        img["meta"]["mod"] = "\n- Taille réduite"
+        return img
