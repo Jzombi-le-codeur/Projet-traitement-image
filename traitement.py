@@ -154,40 +154,69 @@ class Traitement:
         img = deepcopy(img)
         img_pxs = np.array(img["pix"], dtype=np.uint8)
 
-        """ Stretch la largeur """
-        i = img_pxs.shape[1] % ratio
-        cols = img_pxs.shape[1] - i
-        img_pxs_first = img_pxs[:, :cols, :]
-        img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
-        img_pxs_first = np.mean(img_pxs_first, axis=-2)
-        img_pxs_first = img_pxs_first.astype(int)
-        last_col = img_pxs[:, cols:, :]
-        """
-        if i > 0:
-            img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
+        if img["meta"]["extension"] == ".ppm":
+            """ Stretch la largeur """
+            i = img_pxs.shape[1] % ratio
+            cols = img_pxs.shape[1] - i
+            img_pxs_first = img_pxs[:, :cols, :]
+            img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
+            img_pxs_first = np.mean(img_pxs_first, axis=-2)
+            img_pxs_first = img_pxs_first.astype(int)
+            last_col = img_pxs[:, cols:, :]
+            """
+            if i > 0:
+                img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
+    
+            else:
+            """
+            img_pxs = img_pxs_first
 
-        else:
-        """
-        img_pxs = img_pxs_first
+            """ Hauteur """
+            img_pxs = np.rot90(img_pxs, k=-1)
+            i = img_pxs.shape[1] % ratio
+            cols = img_pxs.shape[1] - i
+            img_pxs_first = img_pxs[:, :cols, :]
+            img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
+            img_pxs_first = np.mean(img_pxs_first, axis=-2)
+            img_pxs_first = img_pxs_first.astype(int)
+            last_col = img_pxs[:, cols:, :]
+            """
+            if i > 0:
+                img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
+    
+            else:
+            """
+            img_pxs = img_pxs_first
 
-        """ Hauteur """
-        img_pxs = np.rot90(img_pxs, k=-1)
-        i = img_pxs.shape[1] % ratio
-        cols = img_pxs.shape[1] - i
-        img_pxs_first = img_pxs[:, :cols, :]
-        img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
-        img_pxs_first = np.mean(img_pxs_first, axis=-2)
-        img_pxs_first = img_pxs_first.astype(int)
-        last_col = img_pxs[:, cols:, :]
-        """
-        if i > 0:
-            img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
+            img_pxs = np.rot90(img_pxs, k=1)
 
-        else:
-        """
-        img_pxs = img_pxs_first
+        elif img["meta"]["extension"] == ".pgm" or img["meta"]["extension"] == ".pbm":
+            if img["meta"]["extension"] == ".pbm":
+                img_pxs[img_pxs == 1] = 255
 
-        img_pxs = np.rot90(img_pxs, k=1)
+            i = img_pxs.shape[1] % ratio
+            cols = img_pxs.shape[1] - i
+            img_pxs_first = img_pxs[:, :cols]
+            img_pxs_first = np.reshape(img_pxs_first,
+                                       (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio))
+            img_pxs_first = np.mean(img_pxs_first, axis=-1)
+            img_pxs_first = img_pxs_first.astype(int)
+            img_pxs = img_pxs_first
+
+            img_pxs = np.rot90(img_pxs, k=-1)
+            i = img_pxs.shape[1] % ratio
+            cols = img_pxs.shape[1] - i
+            img_pxs_first = img_pxs[:, :cols]
+            img_pxs_first = np.reshape(img_pxs_first,
+                                       (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio))
+            img_pxs_first = np.mean(img_pxs_first, axis=-1)
+            img_pxs_first = img_pxs_first.astype(int)
+            img_pxs = img_pxs_first
+            img_pxs = np.rot90(img_pxs, k=1)
+
+            if img["meta"]["extension"] == ".pbm":
+                img_pxs[img_pxs < 128] = 0
+                img_pxs[img_pxs >= 128] = 1
 
         img["pix"] = img_pxs
         img["meta"]["col"] = img_pxs.shape[1]
