@@ -8,8 +8,9 @@ from tkinter import messagebox
 class Win(Tk):
     def __init__(self):
         super().__init__()
-        self.wins = [None]*14
-        self.wins_opened = [False]*14
+        self.n_wins = 16
+        self.wins = [None]*self.n_wins
+        self.wins_opened = [False]*self.n_wins
         self.resolution = (1024, 576)
         self.imgs = []
 
@@ -116,6 +117,14 @@ class Win(Tk):
         self.symhori_button = Button(self, text="Symétrie Horizontale", command=lambda: self.symHori())
         self.symhori_button.pack()
 
+        self.rotate_frame = Frame(self)
+        self.rotate_frame.pack()
+        self.rotate_button = Button(self.rotate_frame, text="Rotation",
+                                        command=lambda: self.rotate())
+        self.rotate_button.grid(row=0, column=0)
+        self.rotate_entry = Entry(self.rotate_frame, width=5)
+        self.rotate_entry.grid(row=0, column=1)
+
         self.rot180_button = Button(self, text="Rotation à 180°", command=lambda: self.rot180())
         self.rot180_button.pack()
 
@@ -152,11 +161,23 @@ class Win(Tk):
         self.increase_size_entry = Entry(self.size_frame, width=5)
         self.increase_size_entry.grid(row=0, column=1)
 
-        self.decrease_size_button = Button(self.size_frame, text="Diminuer la luminosité - (0-100) %",
+        self.decrease_size_button = Button(self.size_frame, text="Diminuer la taille de l'image (ratio entier) %",
                                                 command=lambda: self.decrease_size())
         self.decrease_size_button.grid(row=1, column=0)
         self.decrease_size_entry = Entry(self.size_frame, width=5)
         self.decrease_size_entry.grid(row=1, column=1)
+
+        self.change_rgb_frame = Frame(self)
+        self.change_rgb_frame.pack()
+        self.change_rgb_button = Button(self.change_rgb_frame, text="Changer le RGB",
+                                                 command=lambda: self.change_rgb())
+        self.change_rgb_button.grid(row=0, column=0)
+        self.change_r_entry = Entry(self.change_rgb_frame, width=5)
+        self.change_r_entry.grid(row=0, column=1)
+        self.change_g_entry = Entry(self.change_rgb_frame, width=5)
+        self.change_g_entry.grid(row=0, column=2)
+        self.change_b_entry = Entry(self.change_rgb_frame, width=5)
+        self.change_b_entry.grid(row=0, column=3)
 
     def symVert(self):
         try:
@@ -356,7 +377,7 @@ class Win(Tk):
         except FileNotFoundError:
             messagebox.showerror(title="Fichier inexistant !",
                                  message=f"Le fichier {self.img_1_path_entry.get()}\nn'existe pas !")
-            self.close_win(img_id=12)
+            self.close_win(img_id=13)
 
     def decrease_size(self):
         try:
@@ -380,7 +401,53 @@ class Win(Tk):
         except FileNotFoundError:
             messagebox.showerror(title="Fichier inexistant !",
                                  message=f"Le fichier {self.img_1_path_entry.get()}\nn'existe pas !")
-            self.close_win(img_id=13)
+            self.close_win(img_id=14)
+
+    def change_rgb(self):
+        try:
+            rgb_values = (max(-100, min(100, int(self.change_r_entry.get()))) if self.change_r_entry.get() else None,
+                          max(-100, min(100, int(self.change_g_entry.get()))) if self.change_g_entry.get() else None,
+                          max(-100, min(100, int(self.change_b_entry.get()))) if self.change_b_entry.get() else None,
+            )
+            self.wins[14] = Toplevel()
+            win = self.wins[14]
+            support = Support(win=win)
+            img = support.open(filename=self.img_1_path_entry.get())
+            image = self.traitement.change_rgb(img=img, rgb=rgb_values)
+
+            support.save(img=image)
+
+            image = support.create_image(image=image, ratio=2)
+            img = support.create_image(image=img, ratio=2)
+
+            support.compare(imgs=[img, image])
+
+        except FileNotFoundError:
+            messagebox.showerror(title="Fichier inexistant !",
+                                 message=f"Le fichier {self.img_1_path_entry.get()}\nn'existe pas !")
+            self.close_win(img_id=15)
+            
+    def rotate(self):
+        try:
+            angle = max(0, min(360, int(self.rotate_entry.get())))
+            self.wins[15] = Toplevel()
+            win = self.wins[15]
+            support = Support(win=win)
+            img = support.open(filename=self.img_1_path_entry.get())
+            image = self.traitement.rotate(img=img, angle=angle)
+
+            support.save(img=image)
+
+            image = support.create_image(image=image, ratio=2)
+            img = support.create_image(image=img, ratio=2)
+
+            support.compare(imgs=[img, image])
+
+        except FileNotFoundError:
+            messagebox.showerror(title="Fichier inexistant !",
+                                 message=f"Le fichier {self.img_1_path_entry.get()}\nn'existe pas !")
+            self.close_win(img_id=16)
+
 
     def manage_win(self):
         # Informations fenêtres

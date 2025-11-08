@@ -1,6 +1,8 @@
 from copy import deepcopy
 from support import Support
 import numpy as np
+import json
+from scipy.ndimage import rotate
 
 
 class Traitement:
@@ -222,4 +224,44 @@ class Traitement:
         img["meta"]["col"] = img_pxs.shape[1]
         img["meta"]["lig"] = img_pxs.shape[0]
         img["meta"]["mod"] = "\n- Taille réduite"
+        return img
+
+    def change_rgb(self, img: dict, rgb: tuple[int | None, int | None, int | None]) -> dict:
+        img = deepcopy(img)
+        if img["meta"]["extension"] == ".ppm":
+            img_pxs = np.array(img["pix"], dtype=np.uint8)
+            print(img_pxs)
+            print(img_pxs.shape)
+            r, g, b = rgb
+            if r:
+                gb = 1-(r/100)
+                r = 1+(r/100)
+                img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0]*r, 0, 255)
+                # img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1]*gb, 0, 255)
+                # img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2]*gb, 0, 255)
+                
+            if g:
+                rb = 1-(g/100)
+                g = 1+(g/100)
+                # img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0]*rb, 0, 255)
+                img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1]*g, 0, 255)
+                # img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2]*rb, 0, 255)
+                
+            if b:
+                rg = 1-(b/100)
+                b = 1+(b/100)
+                # img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0]*rg, 0, 255)
+                # img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1]*rg, 0, 255)
+                img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2]*b, 0, 255)
+
+            img["pix"] = img_pxs
+            img["mod"] = "\n- Changement de couleur"
+
+        return img
+
+    def rotate(self, img: dict, angle: int) -> dict:
+        img = deepcopy(img)
+        img_pxs = np.array(img["pix"], dtype=np.uint8)
+        img["pix"] = rotate(img_pxs, angle=angle)
+        img["meta"]["mod"] = "\n- Rotation"
         return img
