@@ -136,14 +136,14 @@ class Support():
 
     def create_image(self, image: dict, ratio: int = 2) -> Image.Image:
         ratio = self.__calculate_ratio(image=image)/ratio
-        if self.img_type == "pbm":
+        if image["meta"]["extension"] == ".pbm":
             image_pxs = np.array(image["pix"], dtype=np.uint8)
             image_pxs[image_pxs == 1] = 255
             image_pxs = np.repeat(image_pxs[..., np.newaxis], repeats=3, axis=2)
             image_pixels = np.repeat(np.repeat(image_pxs, repeats=ratio, axis=1), repeats=ratio, axis=0)
             self.img_to_display = Image.fromarray(image_pixels, mode="RGB")
 
-        elif self.img_type == "pgm":
+        elif image["meta"]["extension"] == ".pgm":
             image_pxs = np.array(image["pix"], dtype=np.uint8)
             image_pxs = np.repeat(image_pxs[..., np.newaxis], repeats=3, axis=2)
 

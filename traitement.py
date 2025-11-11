@@ -93,6 +93,7 @@ class Traitement:
         return img
 
     def convert_to_bw_mode(self, img: dict, file_conversion: bool) -> dict:
+        print(file_conversion)
         if img["meta"]["extension"] != ".pbm":
             img = deepcopy(img)
             img = self.convert_to_grey_mode(img=img, local=True, file_conversion=False)
@@ -111,6 +112,7 @@ class Traitement:
 
         img["meta"]["mod"] = "\n- Converti en noir et blanc"
 
+        print(img["meta"])
         return img
 
     def change_brightness(self, img: dict, t: int) -> dict:

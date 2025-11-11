@@ -116,8 +116,6 @@ class EditPage(Frame):
     def __init__(self, win):
         self.win = win
         super().__init__()
-
-        self.support = Support()
         self.win_traitement = WinTraitement(edit_page=self)
 
         self.active_image = IntVar()  # 0(compare)/1/2/
@@ -134,16 +132,19 @@ class EditPage(Frame):
     def __open_image(self, image: int = 0):
         if image == 0:
             for img in self.win.imgs:
+                support = Support()
                 if img["filepath"] != pathlib.Path():
-                    img["imgs"].append(self.support.open(filename=img["filepath"]))
+                    img["imgs"].append(support.open(filename=img["filepath"]))
 
         else:
-            self.win.imgs[image-1]["imgs"].append(self.support.open(filename=self.win.imgs[image-1]["filepath"]))
+            support = Support()
+            self.win.imgs[image-1]["imgs"].append(support.open(filename=self.win.imgs[image-1]["filepath"]))
 
     def __draw_image(self, *args):
         active_image = self.active_image.get()
         if active_image != 0:
-            image = self.support.create_image(image=self.win.imgs[active_image-1]["imgs"][-1])
+            support = Support()
+            image = support.create_image(image=self.win.imgs[active_image-1]["imgs"][-1])
             image = ImageTk.PhotoImage(image=image)
             self.img_label.config(image=image)
             self.img_label.image = image
