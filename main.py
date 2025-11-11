@@ -153,11 +153,17 @@ class EditPage(Frame):
         if self.new_image.get():
             self.__set_without_flag(var="new_image", value=False)
 
+    def __save_image(self):
+        path = pathlib.Path(filedialog.askdirectory())
+        Support().save(img=self.win.imgs[self.active_image.get()-1]["imgs"][-1], path=path)
+
     def create_page(self):
         self.edit_win_filters = EditWinFilters(edit_page=self)
         self.edit_win_filters.pack()
         self.img_label = Label(self)
         self.img_label.pack()
+        self.save_button = Button(self, text="Sauvegarder", command=self.__save_image)
+        self.save_button.pack()
 
     def manage_page(self):
         self.create_page()
@@ -323,7 +329,6 @@ class WinTraitement:
             b = max(-255, min(255, b))
 
             image = self.traitement.change_rgb(img=img, rgb=(r, g, b))
-
 
         self.edit_page.win.imgs[self.edit_page.active_image.get() - 1]["imgs"].append(image)
         self.edit_page.new_image.set(True)
