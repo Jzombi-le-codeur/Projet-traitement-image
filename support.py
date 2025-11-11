@@ -134,7 +134,7 @@ class Support():
 
         return ratio
 
-    def create_image(self, image: dict, ratio: int = 2) -> None:
+    def create_image(self, image: dict, ratio: int = 2) -> Image.Image:
         ratio = self.__calculate_ratio(image=image)/ratio
         if self.img_type == "pbm":
             image_pxs = np.array(image["pix"], dtype=np.uint8)
