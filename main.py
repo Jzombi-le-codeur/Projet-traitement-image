@@ -114,8 +114,18 @@ class EditPage(Frame):
         super().__init__()
 
         self.support = Support()
+        self.win_traitement = WinTraitement(edit_page=self)
 
-        self.active_image = 1  # 0(compare)/1/2/
+        self.active_image = IntVar()  # 0(compare)/1/2/
+        self.active_image_trace_id = self.active_image.trace_add("write", self.__draw_image)
+        self.new_image = BooleanVar()
+        self.new_image_trace_id = self.new_image.trace_add("write", self.__draw_image)
+
+    def __set_without_flag(self, var: str, value):
+        if var == "new_image":
+            self.new_image.trace_remove("write", self.new_image_trace_id)
+            self.new_image.set(value)
+            self.new_image_trace_id = self.new_image.trace_add("write", self.__draw_image)
 
     def __open_image(self, image: int = 0):
         if image == 0:
@@ -126,12 +136,17 @@ class EditPage(Frame):
         else:
             self.win.imgs[image-1]["imgs"].append(self.support.open(filename=self.win.imgs[image-1]["filepath"]))
 
-    def __draw_image(self):
-        if self.active_image != 0:
-            image = self.support.create_image(image=self.win.imgs[self.active_image-1]["imgs"][-1])
+    def __draw_image(self, *args):
+        active_image = self.active_image.get()
+        if active_image != 0:
+            image = self.support.create_image(image=self.win.imgs[active_image-1]["imgs"][-1])
             image = ImageTk.PhotoImage(image=image)
             self.img_label.config(image=image)
             self.img_label.image = image
+
+        # Réinitaliser les flags
+        if self.new_image.get():
+            self.__set_without_flag(var="new_image", value=False)
 
     def create_page(self):
         self.edit_win_filters = EditWinFilters(edit_page=self)
@@ -142,7 +157,7 @@ class EditPage(Frame):
     def manage_page(self):
         self.create_page()
         self.__open_image()
-        self.__draw_image()
+        self.active_image.set(1)
 
     def run(self):
         self.manage_page()
@@ -152,6 +167,9 @@ class EditWinFilters(Frame):
     def __init__(self, edit_page):
         self.edit_page = edit_page
         super().__init__(edit_page)
+
+        self.aff = self.edit_page.win_traitement.apply_filter  # Fonction "apply filter"
+
         self.frames_sep = 10
         self.filters()
 
@@ -162,7 +180,7 @@ class EditWinFilters(Frame):
         self.sym_frame.grid(column=0, row=0, padx=self.frames_sep)
         
         # Symétrie verticale
-        self.symvert_button = Button(self.sym_frame, text="Symétrie verticale")
+        self.symvert_button = Button(self.sym_frame, text="Symétrie verticale", command=lambda: self.aff("symvert"))
         self.symvert_button.grid(column=0, row=0)
         
         # Symétrie horizontale
@@ -218,7 +236,24 @@ class EditWinFilters(Frame):
         # Couleurs
         self.rgb_button = Button(self.image_settings_frame, text="Modifier les RGB")
         self.rgb_button.grid(column=2, row=0)
+        
+        
+class WinTraitement:
+    def __init__(self, edit_page):
+        self.edit_page = edit_page
+        self.traitement = Traitement()
 
+    def apply_filter(self, filter: str):
+        img = self.edit_page.win.imgs[self.edit_page.active_image.get() - 1]["imgs"][-1]
+        if filter == "symvert":
+            image = self.symVert(img=img)
+
+        self.edit_page.win.imgs[self.edit_page.active_image.get() - 1]["imgs"].append(image)
+        self.edit_page.new_image.set(True)
+
+    def symVert(self, img: dict) -> dict:
+        image = self.traitement.symVert(img=img)
+        return image
 
 
 Win().run()
