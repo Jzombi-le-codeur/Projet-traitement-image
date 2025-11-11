@@ -286,7 +286,8 @@ class WinTraitement:
                 title="Taux luminosité",
                 prompt="De combien de % veux-tu changer la luminosité de l'image (-100 - 100) ?"
             )
-            t = min(-100, max(100, t))
+            t = min(100, max(-100, t))
+            print(t)
             image = self.traitement.change_brightness(img=img, t=t)
 
         elif filter == "size":
@@ -294,7 +295,7 @@ class WinTraitement:
                 title="Ratio changement de taille",
                 prompt="Par combien de fois veux-tu multiplier/diviser la taille (-5 - 5)"
             )
-            ratio = min(-5, max(5, ratio))
+            ratio = min(5, max(-5, ratio))
             if ratio > 0:
                 image = self.traitement.increase_size(img=img, ratio=ratio)
 
