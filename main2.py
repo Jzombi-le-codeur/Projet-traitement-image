@@ -35,9 +35,6 @@ class Win(Tk):
         self.init_page = InitPage(win=self)
         self.edit_page = EditPage(win=self)
 
-        # Settings
-        self.file_conversion = True
-
     def init_informations(self):
         self.title("Projet Traitement Image")
         self.geometry("1280x720")
@@ -188,7 +185,7 @@ class EditWinFilters(Frame):
         self.symvert_button.grid(column=0, row=0)
         
         # Symétrie horizontale
-        self.symhori_button = Button(self.sym_frame, text="Symétrie horizontale", command=lambda: self.aff("symhori"))
+        self.symhori_button = Button(self.sym_frame, text="Symétrie horizontale")
         self.symhori_button.grid(column=1, row=0)
         
         
@@ -198,15 +195,15 @@ class EditWinFilters(Frame):
         self.rot_frame.grid(column=1, row=0, padx=self.frames_sep)
 
         # Free Rotation
-        self.rot_button = Button(self.rot_frame, text="Rotation", command=lambda: self.aff("rot"))
+        self.rot_button = Button(self.rot_frame, text="Rotation")
         self.rot_button.grid(column=0, row=0)
 
         # Rotation 90°
-        self.rot90_button = Button(self.rot_frame, text="Rotation 90°", command=lambda: self.aff("rot90"))
+        self.rot90_button = Button(self.rot_frame, text="Rotation 90°")
         self.rot90_button.grid(column=1, row=0)
 
         # Rotation 180°
-        self.rot180_button = Button(self.rot_frame, text="Rotation 180°", command=lambda: self.aff("rot180"))
+        self.rot180_button = Button(self.rot_frame, text="Rotation 180°")
         self.rot180_button.grid(column=2, row=0)
 
 
@@ -216,34 +213,29 @@ class EditWinFilters(Frame):
         self.convert_frame.grid(column=2, row=0, padx=self.frames_sep)
 
         # Convertion noir/blanc
-        self.convert_bw_button = Button(self.convert_frame, text="Convertir en noir et blanc",
-                                        command=lambda: self.aff("bw"))
+        self.convert_bw_button = Button(self.convert_frame, text="Convertir en noir et blanc")
         self.convert_bw_button.grid(column=0, row=0)
 
         # Convertion niveaux de gris
-        self.convert_grey_button = Button(self.convert_frame, text="Convertir en niveaux de gris",
-                                          command=lambda: self.aff("grey"))
+        self.convert_grey_button = Button(self.convert_frame, text="Convertir en niveaux de gris")
         self.convert_grey_button.grid(column=1, row=0)
 
 
         """ Réglages """
         # Frame Réglages
         self.image_settings_frame = Frame(self)
-        self.image_settings_frame.grid(column=3, row=0, padx=self.frames_sep)
+        self.image_settings_frame.grid(column=2, row=0, padx=self.frames_sep)
 
         # Luminosité
-        self.brightness_button = Button(self.image_settings_frame, text="Changer la luminosité",
-                                        command=lambda: self.aff("brightness"))
+        self.brightness_button = Button(self.image_settings_frame, text="Changer la luminosité")
         self.brightness_button.grid(column=0, row=0)
 
         # Taille
-        self.size_button = Button(self.image_settings_frame, text="Changer la taille",
-                                  command=lambda: self.aff("size"))
+        self.size_button = Button(self.image_settings_frame, text="Changer la taille")
         self.size_button.grid(column=1, row=0)
 
         # Couleurs
-        self.rgb_button = Button(self.image_settings_frame, text="Modifier les RGB",
-                                 command=lambda: self.aff("rgb"))
+        self.rgb_button = Button(self.image_settings_frame, text="Modifier les RGB")
         self.rgb_button.grid(column=2, row=0)
         
         
@@ -273,12 +265,6 @@ class WinTraitement:
 
         elif filter == "rot180":
             image = self.traitement.rot180(img=img)
-
-        elif filter == "bw":
-            image = self.traitement.convert_to_bw_mode(img=img, file_conversion=self.edit_page.win.file_conversion)
-
-        elif filter == "grey":
-            image = self.traitement.convert_to_grey_mode(img=img, file_conversion=self.edit_page.win.file_conversion)
 
         elif filter == "brightness":
             t = simpledialog.askinteger(
