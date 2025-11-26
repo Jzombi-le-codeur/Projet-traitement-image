@@ -15,7 +15,7 @@ class Traitement:
         img_pxs = img_pxs[::-1]
         img["pix"] = img_pxs
         if not local:
-            img["meta"]["mod"] = "\n- Symétrie Horizontale"
+            img["meta"]["mod"] += "\n- Symétrie Horizontale"
         return img
 
     def symHori(self, img: dict, local=False) -> dict:
@@ -24,14 +24,14 @@ class Traitement:
         img_pxs = img_pxs[:, ::-1]
         img["pix"] = img_pxs
         if not local:
-            img["meta"]["mod"] = "\n- Symétrie Horizontale"
+            img["meta"]["mod"] += "\n- Symétrie Horizontale"
         return img
 
     def rot180(self, img: dict) -> dict:
         process_img = deepcopy(img)
         process_img = self.symVert(process_img, local=True)  # verticale
         process_img = self.symHori(process_img, local=True)  # horizontale
-        process_img["meta"]["mod"] = "\n- Rotation 180°"
+        process_img["meta"]["mod"] += "\n- Rotation 180°"
         return process_img
 
     def rot90(self, img: dict) -> dict:
@@ -39,7 +39,7 @@ class Traitement:
         img_pxs = np.array(img["pix"], dtype=np.uint8)
         img_pxs = np.rot90(img_pxs, k=-1)
         img["pix"] = img_pxs
-        img["meta"]["mod"] = "\n- Rotation 90°"
+        img["meta"]["mod"] += "\n- Rotation 90°"
         col = img["meta"]["col"]
         lig = img["meta"]["lig"]
         img["meta"]["col"] = lig
@@ -86,9 +86,8 @@ class Traitement:
                     img_pxs[img_pxs == 1] = 255
                     img["pix"] = img_pxs
 
-
         if not local:
-            img["meta"]["mod"] = "\n- Converti en niveaux de gris"
+            img["meta"]["mod"] += "\n- Converti en niveaux de gris"
 
         return img
 
@@ -109,8 +108,7 @@ class Traitement:
 
             img["pix"] = img_pxs
 
-        img["meta"]["mod"] = "\n- Converti en noir et blanc"
-
+        img["meta"]["mod"] += "\n- Converti en noir et blanc"
         return img
 
     def change_brightness(self, img: dict, t: int) -> dict:
@@ -118,15 +116,15 @@ class Traitement:
             img = deepcopy(img)
             img_pxs = np.array(img["pix"], dtype=np.uint8)
             # img_pxs = 255*(img_pxs/255)**(1+(t/100))
-            img_pxs = img_pxs*(1+(t/100))
+            img_pxs = img_pxs * (1 + (t / 100))
             img_pxs = np.clip(img_pxs, 0, 255)
             img["pix"] = img_pxs
 
         if t < 0:
-            img["meta"]["mod"] = "\n- Luminosité diminuée"
+            img["meta"]["mod"] += "\n- Luminosité diminuée"
 
         elif t > 0:
-            img["meta"]["mod"] = "\n- Luminosité augmentée"
+            img["meta"]["mod"] += "\n- Luminosité augmentée"
 
         return img
 
@@ -146,9 +144,9 @@ class Traitement:
 
         img["pix"] = image_pixels
 
-        img["meta"]["lig"] = str(int(img["meta"]["lig"])*int(ratio))
-        img["meta"]["col"] = str(int(img["meta"]["col"])*int(ratio))
-        img["meta"]["mod"] = "Image aggrandie"
+        img["meta"]["lig"] = str(int(img["meta"]["lig"]) * int(ratio))
+        img["meta"]["col"] = str(int(img["meta"]["col"]) * int(ratio))
+        img["meta"]["mod"] += "Image aggrandie"
 
         return img
 
@@ -161,14 +159,15 @@ class Traitement:
             i = img_pxs.shape[1] % ratio
             cols = img_pxs.shape[1] - i
             img_pxs_first = img_pxs[:, :cols, :]
-            img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
+            img_pxs_first = np.reshape(img_pxs_first,
+                                       (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
             img_pxs_first = np.mean(img_pxs_first, axis=-2)
             img_pxs_first = img_pxs_first.astype(int)
             last_col = img_pxs[:, cols:, :]
             """
             if i > 0:
                 img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
-    
+
             else:
             """
             img_pxs = img_pxs_first
@@ -178,14 +177,15 @@ class Traitement:
             i = img_pxs.shape[1] % ratio
             cols = img_pxs.shape[1] - i
             img_pxs_first = img_pxs[:, :cols, :]
-            img_pxs_first = np.reshape(img_pxs_first, (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
+            img_pxs_first = np.reshape(img_pxs_first,
+                                       (img_pxs_first.shape[0], img_pxs_first.shape[1] // ratio, ratio, 3))
             img_pxs_first = np.mean(img_pxs_first, axis=-2)
             img_pxs_first = img_pxs_first.astype(int)
             last_col = img_pxs[:, cols:, :]
             """
             if i > 0:
                 img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
-    
+
             else:
             """
             img_pxs = img_pxs_first
@@ -223,36 +223,34 @@ class Traitement:
         img["pix"] = img_pxs
         img["meta"]["col"] = img_pxs.shape[1]
         img["meta"]["lig"] = img_pxs.shape[0]
-        img["meta"]["mod"] = "\n- Taille réduite"
+        img["meta"]["mod"] += "\n- Taille réduite"
         return img
 
     def change_rgb(self, img: dict, rgb: tuple[int | None, int | None, int | None]) -> dict:
         img = deepcopy(img)
         if img["meta"]["extension"] == ".ppm":
             img_pxs = np.array(img["pix"], dtype=np.uint8)
-            print(img_pxs)
-            print(img_pxs.shape)
             r, g, b = rgb
             if r:
-                gb = 1-(r/100)
-                r = 1+(r/100)
-                img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0]*r, 0, 255)
+                gb = 1 - (r / 100)
+                r = 1 + (r / 100)
+                img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0] * r, 0, 255)
                 # img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1]*gb, 0, 255)
                 # img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2]*gb, 0, 255)
-                
+
             if g:
-                rb = 1-(g/100)
-                g = 1+(g/100)
+                rb = 1 - (g / 100)
+                g = 1 + (g / 100)
                 # img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0]*rb, 0, 255)
-                img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1]*g, 0, 255)
+                img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1] * g, 0, 255)
                 # img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2]*rb, 0, 255)
-                
+
             if b:
-                rg = 1-(b/100)
-                b = 1+(b/100)
+                rg = 1 - (b / 100)
+                b = 1 + (b / 100)
                 # img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0]*rg, 0, 255)
                 # img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1]*rg, 0, 255)
-                img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2]*b, 0, 255)
+                img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2] * b, 0, 255)
 
             img["pix"] = img_pxs
             img["mod"] = "\n- Changement de couleur"
@@ -263,5 +261,5 @@ class Traitement:
         img = deepcopy(img)
         img_pxs = np.array(img["pix"], dtype=np.uint8)
         img["pix"] = rotate(img_pxs, angle=angle)
-        img["meta"]["mod"] = "\n- Rotation"
+        img["meta"]["mod"] += "\n- Rotation"
         return img

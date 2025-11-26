@@ -107,7 +107,7 @@ class Support():
 
     def open(self, filename: str | pathlib.Path) -> dict:
         # Ouvrir le fichier
-        with open(filename) as img_file:
+        with open(filename, "r") as img_file:
             self.img_content = img_file.read()
             self.img_file_lines = self.img_content.split(sep="\n")
 
@@ -119,44 +119,55 @@ class Support():
 
         return self.formated_img_content
 
-    def __calculate_ratio(self, image: dict) -> int:
-        max_lines_px = 720
-        max_height_px = 1280
+    def __calculate_display_size(self, image: dict) -> tuple[int, int]:
+        """Calcule la taille d'affichage optimale pour l'image"""
+        max_height = 720
+        max_width = 1280
 
-        img_lines_px = image["meta"]["lig"]
-        img_height_px = image["meta"]["col"]
+        img_height = int(image["meta"]["lig"])
+        img_width = int(image["meta"]["col"])
 
-        ratio = 0
-        while True:
-            ratio += 1
-            if int(img_lines_px)*ratio > max_lines_px or int(img_height_px)*ratio > max_height_px:
-                break
+        # Calculer les ratios nécessaires
+        ratio_height = max_height / img_height
+        ratio_width = max_width / img_width
 
-        return ratio
+        # Prendre le plus petit ratio pour que tout rentre
+        ratio = min(ratio_height, ratio_width)
 
-    def create_image(self, image: dict, ratio: int = 2) -> None:
-        ratio = self.__calculate_ratio(image=image)/ratio
-        if self.img_type == "pbm":
+        # Calculer les nouvelles dimensions
+        new_height = int(img_height * ratio)
+        new_width = int(img_width * ratio)
+
+        return new_width, new_height
+
+    def create_image(self, image: dict, ratio: int = 2) -> Image.Image:
+        """Crée une image PIL à partir des données formatées"""
+        # Calculer la taille d'affichage optimale
+        display_width, display_height = self.__calculate_display_size(image=image)
+
+        if image["meta"]["extension"] == ".pbm":
             image_pxs = np.array(image["pix"], dtype=np.uint8)
             image_pxs[image_pxs == 1] = 255
             image_pxs = np.repeat(image_pxs[..., np.newaxis], repeats=3, axis=2)
-            image_pixels = np.repeat(np.repeat(image_pxs, repeats=ratio, axis=1), repeats=ratio, axis=0)
-            self.img_to_display = Image.fromarray(image_pixels, mode="RGB")
+            self.img_to_display = Image.fromarray(image_pxs, mode="RGB")
 
-        elif self.img_type == "pgm":
+        elif image["meta"]["extension"] == ".pgm":
             image_pxs = np.array(image["pix"], dtype=np.uint8)
             image_pxs = np.repeat(image_pxs[..., np.newaxis], repeats=3, axis=2)
-
-            image_pixels = np.repeat(np.repeat(image_pxs, repeats=ratio, axis=1), repeats=ratio, axis=0)
-            self.img_to_display = Image.fromarray(image_pixels, mode="RGB")
+            self.img_to_display = Image.fromarray(image_pxs, mode="RGB")
 
         else:
             image_pxs = np.array(image["pix"], dtype=np.uint8)
-            image_pixels = np.repeat(np.repeat(image_pxs, repeats=ratio, axis=1), repeats=ratio, axis=0)
-            self.img_to_display = Image.fromarray(image_pixels, mode="RGB")
+            self.img_to_display = Image.fromarray(image_pxs, mode="RGB")
+
+        self.img_to_display = self.img_to_display.resize(
+            (display_width//ratio, display_height//ratio),
+            Image.Resampling.NEAREST
+        )
 
         return self.img_to_display
 
+    """
     def display_image(self, image: Image) -> None:
         self.win.title("image")
 
@@ -164,7 +175,9 @@ class Support():
         image_label = Label(self.win, image=image)
         image_label.image = image
         image_label.pack()
+    """
 
+    """
     def compare(self, imgs: list):
         image_to_display = ImageTk.PhotoImage(imgs[0])
         image2_to_display = ImageTk.PhotoImage(imgs[1])
@@ -176,8 +189,10 @@ class Support():
         image2 = Label(self.win, image=image2_to_display)
         image2.image = image2_to_display
         image2.grid(column=2, row=1, padx=10)
+    """
 
     def save(self, img: dict, path: str | pathlib.Path = pathlib.Path("images")):
+        img["meta"]["mod"] = img["meta"]["mod"][2:]  # Supprimer le premier retour à la ligne de mod
         if img["meta"]["extension"] == ".pbm":
             with open(pathlib.Path.joinpath(path, f"{img["meta"]["title"]}_modifié.pbm"), "w") as file:
                 file.writelines(["P1\n", str(img["meta"]["col"])+"\n", str(img["meta"]["lig"])+"\n"])
