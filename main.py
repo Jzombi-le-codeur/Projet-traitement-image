@@ -9,6 +9,7 @@ import darkdetect
 
 
 class Win(Tk):
+    """ CLASSE GERANT LA FENETRE """
     def __init__(self):
         super().__init__()
 
@@ -174,6 +175,7 @@ class Win(Tk):
 
 
 class InitPage(Frame):
+    """ Gère la première page de la fenêtre. """
     def __init__(self, win):
         self.win = win
         super().__init__()
@@ -223,6 +225,7 @@ class InitPage(Frame):
 
 
 class EditPage(Frame):
+    """ Gère la page d'édition de l'image. Dépend de Win, et hérite de tk.Frame """
     def __init__(self, win):
         self.win = win
         super().__init__()
@@ -338,6 +341,7 @@ class EditPage(Frame):
 
 
 class EditWinFilters(Frame):
+    """ Classe gérant les boutons pour appliquer les filtres sur la page. Dépend de EditPage, et hérite de tk.Frame """
     def __init__(self, edit_page):
         self.edit_page = edit_page
         super().__init__(edit_page)
@@ -415,6 +419,7 @@ class EditWinFilters(Frame):
 
 
 class WinTraitement:
+    """ Classe appliquant les filtres (exécute les méthode de Traitement). Dépend de EditPage, et hérite de tk.Frame """
     def __init__(self, edit_page):
         self.edit_page = edit_page
         self.traitement = Traitement()
@@ -494,6 +499,7 @@ class WinTraitement:
 
 
 class ViewPage(Frame):
+    """ Classe gérant la page de view-only des images. Dépend de Win, et hérite de tk.Frame """
     def __init__(self, win):
         self.win = win
         super().__init__()

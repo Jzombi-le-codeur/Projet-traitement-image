@@ -6,6 +6,7 @@ import numpy as np
 
 
 class UnsupportedFileError(Exception):
+    """ Erreur sur les types d'image non supportés (autres que pbm, pgm et ppm) """
     def __init__(self, message):
         super.__init__(message)
 
@@ -63,9 +64,6 @@ class Support():
                 formated_line = [int(val) for val in line.split() if val]
                 formated_datas.append(formated_line)
 
-            # PEUT ETRE REVOIR REFORMATAGE SI 1 LIGNE FICHIER PAS EGAL A LIGNE IMAGE
-            # self.formated_img_content["pix"] = formated_datas
-
         else:
             formated_datas = []
             for line in self.img_file_lines:
@@ -97,8 +95,6 @@ class Support():
                 # Ajouter la ligne aux données de l'image
                 formated_datas.append(line_pixels)
 
-            # self.formated_img_content["pix"] = formated_datas
-
         # Vérifier qu'aucune ligne n'est vide
         formated_datas_arr = np.array(formated_datas, dtype=object)
         formated_datas_arr = formated_datas_arr[np.array([len(row) > 0 for row in formated_datas_arr])]
@@ -106,6 +102,14 @@ class Support():
 
 
     def open(self, filename: str | pathlib.Path) -> dict:
+        """
+        Extrait les données de l'image
+
+        :param filename: chemin du fichier à ouvrir
+        :type filename: str | pathlib.Path
+        :return: Données de l'image au format imposé
+        :rtype: dict
+        """
         # Ouvrir le fichier
         with open(filename, "r") as img_file:
             self.img_content = img_file.read()
@@ -141,7 +145,16 @@ class Support():
         return new_width, new_height
 
     def create_image(self, image: dict, ratio: int = 2) -> Image.Image:
-        """Crée une image PIL à partir des données formatées"""
+        """
+        Crée une image "affichable"
+
+        :param image: Données de l'image
+        :type filename: dict
+        :param ratio: ratio d'aggrandissement, pour l'affichage sur la fenêtre
+        :type ratio: int
+        :return: Image à afficher
+        :rtype: Image.Image
+        """
         # Calculer la taille d'affichage optimale
         display_width, display_height = self.__calculate_display_size(image=image)
 
@@ -167,31 +180,16 @@ class Support():
 
         return self.img_to_display
 
-    """
-    def display_image(self, image: Image) -> None:
-        self.win.title("image")
-
-        image = ImageTk.PhotoImage(image)
-        image_label = Label(self.win, image=image)
-        image_label.image = image
-        image_label.pack()
-    """
-
-    """
-    def compare(self, imgs: list):
-        image_to_display = ImageTk.PhotoImage(imgs[0])
-        image2_to_display = ImageTk.PhotoImage(imgs[1])
-
-        self.win.title("test")
-        image1 = Label(self.win, image=image_to_display)
-        image1.image = image_to_display
-        image1.grid(column=1, row=1, padx=10)
-        image2 = Label(self.win, image=image2_to_display)
-        image2.image = image2_to_display
-        image2.grid(column=2, row=1, padx=10)
-    """
-
     def save(self, img: dict, path: str | pathlib.Path = pathlib.Path("images")):
+        """
+        Sauvegarde l'image dans un répertoire donné
+
+        :param img: Données de l'image
+        :type img: dict
+        :param path: Chemin du répertoire où sauvegarder le fichier
+        :type path: str | pathlib.Path
+        :return:
+        """
         img["meta"]["mod"] = img["meta"]["mod"][2:]  # Supprimer le premier retour à la ligne de mod
         if img["meta"]["extension"] == ".pbm":
             with open(pathlib.Path.joinpath(path, f"{img["meta"]["title"]}_modifié.pbm"), "w") as file:
@@ -209,17 +207,3 @@ class Support():
                 img_pxs = np.array(img["pix"], dtype=np.uint8)
                 img_pxs = img_pxs.reshape(img_pxs.shape[0], -1)
                 np.savetxt(file, img_pxs, fmt="%d", delimiter=" ")
-
-
-if __name__ == "__main__":
-    win = Tk()
-    support = Support(win=win)
-    imgs_paths = [pathlib.Path("images\\salva.pbm"), pathlib.Path("images\\salva.ppm")]
-    images = list()
-    for i in imgs_paths:
-        support_i = Support(win=win)
-        img = support_i.open(filename=i)
-        img = support_i.create_image(image=img)
-        images.append(img)
-
-    support.compare(imgs=images)

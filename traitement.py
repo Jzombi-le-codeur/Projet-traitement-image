@@ -10,6 +10,16 @@ class Traitement:
         self.support = Support()
 
     def symVert(self, img: dict, local=False) -> dict:
+        """
+        Applique un filtre de symétrie verticale sur l'image
+
+        :param img: Données de l'image
+        :type img: dict
+        :param local: Si la fonction est utilisée par le module traitement ou pas
+        :type local: bool
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         img = deepcopy(img)
         img_pxs = np.array(img["pix"], dtype=np.uint8)
         img_pxs = img_pxs[::-1]
@@ -19,6 +29,16 @@ class Traitement:
         return img
 
     def symHori(self, img: dict, local=False) -> dict:
+        """
+        Applique un filtre de symétrie horizontale sur l'image
+
+        :param img: Données de l'image
+        :type img: dict
+        :param local: Si la fonction est utilisée par le module traitement ou pas
+        :type local: bool
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         img = deepcopy(img)
         img_pxs = np.array(img["pix"], dtype=np.uint8)
         img_pxs = img_pxs[:, ::-1]
@@ -28,6 +48,14 @@ class Traitement:
         return img
 
     def rot180(self, img: dict) -> dict:
+        """
+        Applique un filtre de rotation à 180° sur l'image
+
+        :param img: Données de l'image
+        :type img: dict
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         process_img = deepcopy(img)
         process_img = self.symVert(process_img, local=True)  # verticale
         process_img = self.symHori(process_img, local=True)  # horizontale
@@ -35,6 +63,14 @@ class Traitement:
         return process_img
 
     def rot90(self, img: dict) -> dict:
+        """
+        Applique un filtre de rotation à 90° sur l'image
+
+        :param img: Données de l'image
+        :type img: dict
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         img = deepcopy(img)
         img_pxs = np.array(img["pix"], dtype=np.uint8)
         img_pxs = np.rot90(img_pxs, k=-1)
@@ -46,7 +82,19 @@ class Traitement:
         img["meta"]["lig"] = col
         return img
 
-    def convert_to_grey_mode(self, img: dict, file_conversion, local=False) -> dict:
+    def convert_to_grey_mode(self, img: dict, file_conversion: bool, local=False) -> dict:
+        """
+        Convertit l'image en niveaux de gris
+
+        :param img: Données de l'image
+        :type img: dict
+        :param file_conversion: Est-ce que la conversion en PGM doit se faire
+        :type file_conversion: bool
+        :param local: Si la fonction est utilisée par le module traitement ou pas
+        :type local: bool
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         if file_conversion:
             img = deepcopy(img)
             if img["meta"]["extension"] == ".ppm":
@@ -92,6 +140,16 @@ class Traitement:
         return img
 
     def convert_to_bw_mode(self, img: dict, file_conversion: bool) -> dict:
+        """
+        Convertit l'image en noir et blanc
+
+        :param img: Données de l'image
+        :type img: dict
+        :param file_conversion: Est-ce que la conversion en PBM doit se faire
+        :type file_conversion: bool
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         if img["meta"]["extension"] != ".pbm":
             img = deepcopy(img)
             img = self.convert_to_grey_mode(img=img, local=True, file_conversion=False)
@@ -112,6 +170,16 @@ class Traitement:
         return img
 
     def change_brightness(self, img: dict, t: int) -> dict:
+        """
+        Change la luminosité de l'image
+
+        :param img: Données de l'image
+        :type img: dict
+        :param t: Taux d'éclairage/assombrissement
+        :type t: int
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         if img["meta"]["extension"] != ".pbm":
             img = deepcopy(img)
             img_pxs = np.array(img["pix"], dtype=np.uint8)
@@ -129,6 +197,16 @@ class Traitement:
         return img
 
     def increase_size(self, img: dict, ratio: int) -> dict:
+        """
+        Augmente la résolution de l'image
+
+        :param img: Données de l'image
+        :type img: dict
+        :param ratio: Ratio d'aggrandissement
+        :type ratio: int
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         img = deepcopy(img)
         if img["meta"]["extension"] == ".pbm":
             image_pxs = np.array(img["pix"], dtype=np.uint8)
@@ -151,6 +229,16 @@ class Traitement:
         return img
 
     def decrease_size(self, img: dict, ratio: int) -> dict:
+        """
+        Diminue la résolution de l'image
+
+        :param img: Données de l'image
+        :type img: dict
+        :param ratio: Ratio de dégransissement
+        :type ratio: int
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         img = deepcopy(img)
         img_pxs = np.array(img["pix"], dtype=np.uint8)
 
@@ -164,12 +252,6 @@ class Traitement:
             img_pxs_first = np.mean(img_pxs_first, axis=-2)
             img_pxs_first = img_pxs_first.astype(int)
             last_col = img_pxs[:, cols:, :]
-            """
-            if i > 0:
-                img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
-
-            else:
-            """
             img_pxs = img_pxs_first
 
             """ Hauteur """
@@ -182,12 +264,6 @@ class Traitement:
             img_pxs_first = np.mean(img_pxs_first, axis=-2)
             img_pxs_first = img_pxs_first.astype(int)
             last_col = img_pxs[:, cols:, :]
-            """
-            if i > 0:
-                img_pxs = np.concatenate([img_pxs_first, last_col], axis=1)
-
-            else:
-            """
             img_pxs = img_pxs_first
 
             img_pxs = np.rot90(img_pxs, k=1)
@@ -227,6 +303,16 @@ class Traitement:
         return img
 
     def change_rgb(self, img: dict, rgb: tuple[int | None, int | None, int | None]) -> dict:
+        """
+        Change les niveaux de RGB de l'image
+
+        :param img: Données de l'image
+        :type img: dict
+        :param rgb: Taux d'augmentation/réduction des 3 couleurs
+        :type rgb: tuple[int | None, int | None, int | None]
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         img = deepcopy(img)
         if img["meta"]["extension"] == ".ppm":
             img_pxs = np.array(img["pix"], dtype=np.uint8)
@@ -235,21 +321,15 @@ class Traitement:
                 gb = 1 - (r / 100)
                 r = 1 + (r / 100)
                 img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0] * r, 0, 255)
-                # img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1]*gb, 0, 255)
-                # img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2]*gb, 0, 255)
 
             if g:
                 rb = 1 - (g / 100)
                 g = 1 + (g / 100)
-                # img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0]*rb, 0, 255)
                 img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1] * g, 0, 255)
-                # img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2]*rb, 0, 255)
 
             if b:
                 rg = 1 - (b / 100)
                 b = 1 + (b / 100)
-                # img_pxs[:, :, 0] = np.clip(img_pxs[:, :, 0]*rg, 0, 255)
-                # img_pxs[:, :, 1] = np.clip(img_pxs[:, :, 1]*rg, 0, 255)
                 img_pxs[:, :, 2] = np.clip(img_pxs[:, :, 2] * b, 0, 255)
 
             img["pix"] = img_pxs
@@ -258,6 +338,16 @@ class Traitement:
         return img
 
     def rotate(self, img: dict, angle: int) -> dict:
+        """
+        Applique une rotation libre sur l'image
+
+        :param img: Données de l'image
+        :type img: dict
+        :param angle: Angle de rotation
+        :type angle: int
+        :return: Données de l'image traitées
+        :rtype: dict
+        """
         img = deepcopy(img)
         img_pxs = np.array(img["pix"], dtype=np.uint8)
         img["pix"] = rotate(img_pxs, angle=angle)
